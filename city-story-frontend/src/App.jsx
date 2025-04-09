@@ -26,17 +26,14 @@ const mapOptions = {
 
 const getResponse = async () => {
   try {
-    const response = await fetch("https://city-story-server-1dab1cdfb3b7.herokuapp.com/ping");
+    const response = await fetch("https://city-story-server-1dab1cdfb3b7.herokuapp.com/landmarks");
     const data = await response.json();
     console.log(data);}
   catch (error) {
     console.error('Error fetching data:', error);
   }
 }
-
 getResponse();
-
-
 
 function App() {
   return (
@@ -44,7 +41,7 @@ function App() {
       <APIProvider apiKey={key}>
         <Map
           mapId={'6f0b5d4f2c4c0e9c'}
-          style={{ width: '100vw', height: '100vh' }}
+          style={{ width: '75vw', height: '75vh' }}
           center={{ lat: 42.3601, lng: -71.0589 }}
           defaultZoom={14.5}
           gestureHandling={'greedy'}
