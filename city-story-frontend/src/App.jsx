@@ -1,11 +1,13 @@
 import './App.css'
+import { useState, useEffect } from 'react';
 import { 
   AdvancedMarker,
   APIProvider,
   InfoWindow,
   Map,
   Marker,
-  Pin } from '@vis.gl/react-google-maps';
+  Pin 
+} from '@vis.gl/react-google-maps';
 import { MarkerWithInfowindow } from './components/MarkerWithInfoWindow';
 
 const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -24,18 +26,23 @@ const mapOptions = {
   ]
 };
 
-const getResponse = async () => {
-  try {
-    const response = await fetch("https://city-story-server-1dab1cdfb3b7.herokuapp.com/landmarks");
-    const data = await response.json();
-    console.log(data);}
-  catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
-getResponse();
-
 function App() {
+  const [landmarks, setLandmarks] = useState([]);
+
+  useEffect(() => {
+    const fetchLandmarks = async () => {
+      try {
+        const response = await fetch("https://city-story-server-1dab1cdfb3b7.herokuapp.com/landmarks");
+        const data = await response.json();
+        setLandmarks(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    
+    fetchLandmarks();
+  }, []);
+
   return (
     <>
       <APIProvider apiKey={key}>
@@ -48,20 +55,19 @@ function App() {
           disableDefaultUI={true}
           options={mapOptions}
         >
-
-    {/* Example Marker for Boston */}
-     <MarkerWithInfowindow
-        lat={42.3601}
-        lng={-71.0589}
-        name="Boston Marker"
-        description="This marker is located in Boston."
-      />
-
-          </Map>
+          {landmarks.map((landmark) => (
+            <MarkerWithInfowindow
+              key={landmark.uid}
+              lat={landmark.location.latitude}
+              lng={-landmark.location.longitude}
+              name={landmark.name}
+              description={landmark.description}
+            />
+          ))}
+        </Map>
       </APIProvider>
-      
     </>
-  )
+  );
 }
 
 export default App;
