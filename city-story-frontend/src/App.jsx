@@ -49,7 +49,13 @@ function App() {
           options={mapOptions}
         >
 
-      <MarkerWithInfowindow />
+    {/* Example Marker for Boston */}
+     <MarkerWithInfowindow
+        lat={42.3601}
+        lng={-71.0589}
+        name="Boston Marker"
+        description="This marker is located in Boston."
+      />
 
           </Map>
       </APIProvider>
