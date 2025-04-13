@@ -1,12 +1,338 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Georgia', serif;
   text-align: center;
+  height: 100vh;
+  background-color: #f8f5f0;
+  color: #2a2a2a;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  background-color: #8b0000; /* Deep red for Boston */
+  color: #f8f5f0;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 h1 {
   font-size: 2rem;
-  margin-bottom: 1rem;
-  color: rgb(38, 38, 206);
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-style: italic;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  height: calc(100vh - 80px);
+}
+
+.map-container {
+  flex-grow: 1;
+  height: 100%;
+  position: relative;
+  touch-action: auto;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  cursor: grab;
+  touch-action: pan-x pan-y;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: #555;
+  background-color: #f8f5f0;
+}
+
+.loading::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  margin-left: 15px;
+  border: 3px solid #8b0000;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 300px;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Route panel styling */
+.route-panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+.route-panel h2 {
+  color: #8b0000;
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.route-empty-message {
+  color: #666;
+  font-style: italic;
+  text-align: left;
+}
+
+.route-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
+}
+
+.route-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  background-color: #f8f5f0;
+  border-radius: 4px;
+  border-left: 3px solid #8b0000;
+}
+
+.route-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  background-color: #8b0000;
+  color: white;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.route-name {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.route-remove-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.route-remove-button:hover {
+  color: #8b0000;
+}
+
+.route-controls {
+  position: relative;
+  margin-top: 0;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: white;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.route-mode-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.route-mode-selector label {
+  margin-right: 10px;
+  font-weight: 500;
+}
+
+.route-mode-select {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: 'Georgia', serif;
+}
+
+.route-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.route-button {
+  flex: 1;
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'Georgia', serif;
+}
+
+.route-button:hover:not(:disabled) {
+  background-color: #6d0000;
+}
+
+.route-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.route-button-clear {
+  background-color: #555;
+}
+
+.route-button-clear:hover:not(:disabled) {
+  background-color: #333;
+}
+
+/* InfoWindow styling */
+.info-window-content {
+  font-family: 'Georgia', serif;
+}
+
+.landmark-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #8b0000;
+  margin-bottom: 8px;
+}
+
+.landmark-description {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #2a2a2a;
+  margin-bottom: 12px;
+}
+
+.rating-container {
+  margin-top: 10px;
+}
+
+.rating-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.rating-select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.message {
+  margin-top: 8px;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* InfoWindow Add to Route button */
+.route-button-add, 
+.route-button-remove {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'Georgia', serif;
+}
+
+.route-button-add:hover {
+  background-color: #6d0000;
+}
+
+.route-button-remove {
+  background-color: #555;
+}
+
+.route-button-remove:hover {
+  background-color: #333;
+}
+
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: 300px;
+  }
+  
+  .map-container {
+    height: calc(100% - 300px);
+  }
+  
+  .header {
+    padding: 0.7rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.8rem;
+  }
 }

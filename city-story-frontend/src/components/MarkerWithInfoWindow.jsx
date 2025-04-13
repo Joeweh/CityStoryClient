@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { AdvancedMarker, InfoWindow, useAdvancedMarkerRef } from '@vis.gl/react-google-maps';
+import { RouteContext } from '../context/RouteContext';
 
 const generateUserId = () => {
-  return 'user_' + Math.random().toString(36).substr(2, 9);
+  return 'user_' + Math.random().toString(36).substring(2, 11);
 };
 
 const getOrCreateUserId = () => {
@@ -19,6 +20,9 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
   const [rating, setRating] = useState('');
   const [message, setMessage] = useState('');
   const [markerRef, marker] = useAdvancedMarkerRef();
+  const { addToRoute, removeFromRoute, isInRoute } = useContext(RouteContext);
+  
+  const isAddedToRoute = isInRoute({ uid, name, lat, lng });
 
   useEffect(() => {
     getOrCreateUserId();
@@ -30,7 +34,7 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
     const userId = getOrCreateUserId();
 
     try {
-      const response = await fetch(`https://placeholder-url.com/api/ratings/${uid}`, {
+      const response = await fetch(`https://city-story-server-1dab1cdfb3b7.herokuapp.com/landmarks/${uid}/ratings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -47,6 +51,14 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
     }
   };
 
+  const handleRouteToggle = () => {
+    if (isAddedToRoute) {
+      removeFromRoute(uid);
+    } else {
+      addToRoute({ uid, name, lat, lng });
+    }
+  };
+
   return (
     <>
       <AdvancedMarker
@@ -55,37 +67,52 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
         position={{ lat, lng }}
         title={name}
       />
+      
       {infowindowOpen && (
         <InfoWindow
           anchor={marker}
-          maxWidth={200}
+          maxWidth={300}
           onCloseClick={() => {
             setInfowindowOpen(false);
             setMessage('');
           }}
         >
-          <div style={{
+          <div className="info-window-content" style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
               gap: '8px',
-              padding: '10px'
+              padding: '15px',
+              maxWidth: '280px'
             }}>
-            <strong style={{ fontSize: '16px' }}>{name}</strong>
-            <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>{description}</p>
-            <div>
-              <label htmlFor="rating">Rate (1-5): </label>
-              <select id="rating" value={rating} onChange={handleRatingChange}>
+            <div className="landmark-name">{name}</div>
+            <p className="landmark-description">{description}</p>
+            
+            <button 
+              onClick={handleRouteToggle}
+              className={`route-button ${isAddedToRoute ? 'route-button-remove' : 'route-button-add'}`}
+            >
+              {isAddedToRoute ? 'Remove from Route' : 'Add to Route'}
+            </button>
+            
+            <div className="rating-container">
+              <label className="rating-label" htmlFor={`rating-${uid}`}>Rate this landmark: </label>
+              <select 
+                id={`rating-${uid}`} 
+                value={rating} 
+                onChange={handleRatingChange}
+                className="rating-select"
+              >
                 <option value="" disabled>Select rating</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
+                <option value="1">1 ★</option>
+                <option value="2">2 ★</option>
+                <option value="3">3 ★</option>
+                <option value="4">4 ★</option>
+                <option value="5">5 ★</option>
               </select>
             </div>
             {message && (
-              <p style={{ margin: 0, fontSize: '12px', color: '#333' }}>{message}</p>
+              <p className="message">{message}</p>
             )}
           </div>
         </InfoWindow>
