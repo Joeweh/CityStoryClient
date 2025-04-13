@@ -15,7 +15,7 @@ const getOrCreateUserId = () => {
   return userId;
 };
 
-export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
+export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRating }) => {
   const [infowindowOpen, setInfowindowOpen] = useState(false);
   const [rating, setRating] = useState('');
   const [message, setMessage] = useState('');
@@ -32,7 +32,6 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
     const newRating = e.target.value;
     setRating(newRating);
     const userId = getOrCreateUserId();
-
     try {
       const response = await fetch(`https://city-story-server-1dab1cdfb3b7.herokuapp.com/landmarks/${uid}/ratings`, {
         method: 'PUT',
@@ -96,6 +95,7 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description }) => {
             </button>
             
             <div className="rating-container">
+              <p className="average-rating">Average Rating: {avgRating || 'No ratings yet'}</p>
               <label className="rating-label" htmlFor={`rating-${uid}`}>Rate this landmark: </label>
               <select 
                 id={`rating-${uid}`} 

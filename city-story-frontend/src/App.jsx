@@ -118,6 +118,7 @@ function App() {
                       lng={-landmark.location.longitude}
                       name={landmark.name}
                       description={landmark.description}
+                      avgRating={landmark.averageRating}
                     />
                   ))}
                   <RouteDirections />
