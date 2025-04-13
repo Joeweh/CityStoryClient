@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AdvancedMarker, InfoWindow, useAdvancedMarkerRef } from '@vis.gl/react-google-maps';
+import { AdvancedMarker, InfoWindow, useAdvancedMarkerRef, useMap } from '@vis.gl/react-google-maps';
 import { RouteContext } from '../context/RouteContext';
 
 const generateUserId = () => {
@@ -15,14 +15,41 @@ const getOrCreateUserId = () => {
   return userId;
 };
 
-export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRating }) => {
+export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRating, isOpen, onOpen }) => {
   const [infowindowOpen, setInfowindowOpen] = useState(false);
   const [rating, setRating] = useState('');
   const [message, setMessage] = useState('');
   const [markerRef, marker] = useAdvancedMarkerRef();
   const { addToRoute, removeFromRoute, isInRoute } = useContext(RouteContext);
+  const map = useMap();
   
   const isAddedToRoute = isInRoute({ uid, name, lat, lng });
+
+  // Sync internal state with props
+  useEffect(() => {
+    setInfowindowOpen(isOpen);
+  }, [isOpen]);
+
+  // Pan map when InfoWindow opens to ensure it's visible
+  useEffect(() => {
+    if (infowindowOpen && map && marker) {
+      const position = { lat, lng };
+      const bounds = map.getBounds();
+      
+      if (bounds) {
+        const topPadding = 180; // Pixels of padding at the top
+        const northEast = bounds.getNorthEast();
+        const southWest = bounds.getSouthWest();
+        
+        // If marker is near the top edge of the map
+        if (lat > (northEast.lat() - (northEast.lat() - southWest.lat()) * 0.3)) {
+          // Calculate a position that puts the InfoWindow in view
+          map.panTo({ lat: lat - 0.003, lng });
+          map.panBy(0, -topPadding);
+        }
+      }
+    }
+  }, [infowindowOpen, map, marker, lat, lng]);
 
   useEffect(() => {
     getOrCreateUserId();
@@ -58,11 +85,20 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRati
     }
   };
 
+  const handleMarkerClick = () => {
+    onOpen(uid);
+  };
+
+  const handleInfoWindowClose = () => {
+    onOpen(null);
+    setMessage('');
+  };
+
   return (
     <>
       <AdvancedMarker
         ref={markerRef}
-        onClick={() => setInfowindowOpen(true)}
+        onClick={handleMarkerClick}
         position={{ lat, lng }}
         title={name}
       />
@@ -70,20 +106,14 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRati
       {infowindowOpen && (
         <InfoWindow
           anchor={marker}
-          maxWidth={300}
-          onCloseClick={() => {
-            setInfowindowOpen(false);
-            setMessage('');
+          maxWidth={250}
+          pixelOffset={{ x: 0, y: -30 }}
+          onCloseClick={handleInfoWindowClose}
+          options={{
+            disableAutoPan: false
           }}
         >
-          <div className="info-window-content" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: '8px',
-              padding: '15px',
-              maxWidth: '280px'
-            }}>
+          <div className="info-window-content">
             <div className="landmark-name">{name}</div>
             <p className="landmark-description">{description}</p>
             
@@ -95,7 +125,7 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRati
             </button>
             
             <div className="rating-container">
-              <p className="average-rating">Average Rating: {avgRating || 'No ratings yet'}</p>
+              <p className="average-rating">Average Rating: {avgRating ? Number(avgRating).toFixed(1) + ' ★' : 'No ratings yet'}</p>
               <label className="rating-label" htmlFor={`rating-${uid}`}>Rate this landmark: </label>
               <select 
                 id={`rating-${uid}`} 

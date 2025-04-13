@@ -56,6 +56,7 @@ function App() {
   const [landmarks, setLandmarks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [activeInfoWindow, setActiveInfoWindow] = useState(null);
 
   useEffect(() => {
     const fetchLandmarks = async () => {
@@ -84,6 +85,10 @@ function App() {
       });
       setMapInitialized(true);
     }
+  };
+
+  const handleInfoWindowOpen = (landmarkId) => {
+    setActiveInfoWindow(landmarkId);
   };
 
   return (
@@ -119,6 +124,8 @@ function App() {
                       name={landmark.name}
                       description={landmark.description}
                       avgRating={landmark.averageRating}
+                      isOpen={activeInfoWindow === landmark.uid}
+                      onOpen={handleInfoWindowOpen}
                     />
                   ))}
                   <RouteDirections />

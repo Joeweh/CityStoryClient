@@ -78,6 +78,10 @@ const RoutePanel = () => {
           ))}
         </ul>
       )}
+      
+      <div className="logo-container">
+        <img src="/city_story_logo.png" alt="CityStory Logo" className="logo" />
+      </div>
     </div>
   );
 };
