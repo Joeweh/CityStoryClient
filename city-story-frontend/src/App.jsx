@@ -58,6 +58,7 @@ function App() {
           {landmarks.map((landmark) => (
             <MarkerWithInfowindow
               key={landmark.uid}
+              uid={landmark.uid}
               lat={landmark.location.latitude}
               lng={-landmark.location.longitude}
               name={landmark.name}
