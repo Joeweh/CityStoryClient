@@ -21,13 +21,30 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRati
   const [message, setMessage] = useState('');
   const [markerRef, marker] = useAdvancedMarkerRef();
   const { addToRoute, removeFromRoute, isInRoute } = useContext(RouteContext);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const map = useMap();
   
   const isAddedToRoute = isInRoute({ uid, name, lat, lng });
+  const imagePath = `/${uid}.png`;
+
+  // Handle image loading
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
   // Sync internal state with props
   useEffect(() => {
     setInfowindowOpen(isOpen);
+    if (isOpen) {
+      // Reset image state when opening
+      setImageLoaded(false);
+      setImageError(false);
+    }
   }, [isOpen]);
 
   // Pan map when InfoWindow opens to ensure it's visible
@@ -106,14 +123,29 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRati
       {infowindowOpen && (
         <InfoWindow
           anchor={marker}
-          maxWidth={250}
-          pixelOffset={{ x: 0, y: -30 }}
+          maxWidth={270}
+          pixelOffset={{ x: 0, y: -20 }}
           onCloseClick={handleInfoWindowClose}
           options={{
             disableAutoPan: false
           }}
         >
           <div className="info-window-content">
+            {!imageError && (
+              <div className="landmark-image-container">
+                <img 
+                  src={imagePath} 
+                  alt={name}
+                  className={`landmark-image ${imageLoaded ? 'loaded' : 'loading'}`}
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
+                />
+                {!imageLoaded && !imageError && (
+                  <div className="image-loading">Loading image...</div>
+                )}
+              </div>
+            )}
+            
             <div className="landmark-name">{name}</div>
             <p className="landmark-description">{description}</p>
             
@@ -125,20 +157,20 @@ export const MarkerWithInfowindow = ({ uid, lat, lng, name, description, avgRati
             </button>
             
             <div className="rating-container">
-              <p className="average-rating">Average Rating: {avgRating ? Number(avgRating).toFixed(1) + ' ★' : 'No ratings yet'}</p>
-              <label className="rating-label" htmlFor={`rating-${uid}`}>Rate this landmark: </label>
+              <p className="average-rating">Rating: {avgRating ? Number(avgRating).toFixed(1) + ' ★' : 'None yet'}</p>
+              <label className="rating-label" htmlFor={`rating-${uid}`}>Rate: </label>
               <select 
                 id={`rating-${uid}`} 
                 value={rating} 
                 onChange={handleRatingChange}
                 className="rating-select"
               >
-                <option value="" disabled>Select rating</option>
-                <option value="1">1 ★</option>
-                <option value="2">2 ★</option>
-                <option value="3">3 ★</option>
-                <option value="4">4 ★</option>
-                <option value="5">5 ★</option>
+                <option value="" disabled>Select</option>
+                <option value="1">1★</option>
+                <option value="2">2★</option>
+                <option value="3">3★</option>
+                <option value="4">4★</option>
+                <option value="5">5★</option>
               </select>
             </div>
             {message && (
